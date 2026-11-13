@@ -3,185 +3,205 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>استخراج متن ویدیوی یوتیوب</title>
+  <title>استخراج و کپی متن ویدیوی یوتیوب</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, sans-serif; }
-    body { background: #0f172a; color: #e2e8f0; display: flex; justify-content: center; padding: 40px 20px; }
-    .card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 30px; width: 100%; max-width: 800px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    body {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 20px;
+    }
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 30px;
+      width: 100%;
+      max-width: 820px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
     h1 { color: #38bdf8; margin-bottom: 20px; font-size: 1.5rem; }
-    label { display: block; margin: 15px 0 5px; color: #cbd5e1; font-size: 0.9rem; }
-    input, textarea, select { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-family: inherit; }
-    input:focus, textarea:focus { outline: none; border-color: #38bdf8; }
-    textarea { min-height: 300px; line-height: 1.6; direction: ltr; margin-top: 15px; }
-    button { margin-top: 20px; padding: 12px; width: 100%; background: #38bdf8; color: #0f172a; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+    h2 { color: #38bdf8; margin: 20px 0 10px; font-size: 1.1rem; }
+    label { display: block; margin: 15px 0 6px; color: #cbd5e1; font-size: 0.9rem; }
+    input, textarea, select {
+      width: 100%;
+      padding: 12px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      color: #e2e8f0;
+      font-family: inherit;
+      font-size: 0.95rem;
+    }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #38bdf8;
+    }
+    textarea {
+      min-height: 320px;
+      line-height: 1.7;
+      direction: ltr;
+      resize: vertical;
+    }
+    button {
+      margin-top: 12px;
+      padding: 12px;
+      width: 100%;
+      background: #38bdf8;
+      color: #0f172a;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
     button:hover { background: #0ea5e9; }
     button:disabled { background: #475569; cursor: not-allowed; }
+    button.secondary {
+      background: transparent;
+      border: 1px solid #475569;
+      color: #cbd5e1;
+      font-size: 0.9rem;
+      padding: 8px;
+    }
+    button.secondary:hover { border-color: #38bdf8; color: #38bdf8; background: transparent; }
+    button.green { background: #10b981; }
+    button.green:hover { background: #059669; }
+    button.red { background: transparent; border: 1px solid #f87171; color: #f87171; width: auto; padding: 6px 16px; font-size: 0.85rem; margin: 0 0 15px 0; }
+    button.red:hover { background: #f87171; color: white; }
     .hidden { display: none; }
-    .status { margin-top: 15px; color: #94a3b8; font-size: 0.9rem; text-align: center; }
-    .error { color: #f87171; }
+    .status { margin-top: 15px; color: #94a3b8; font-size: 0.9rem; line-height: 1.8; text-align: right; }
+    .status.error { color: #fbbf24; }
+    .status.success { color: #34d399; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+    .row button { flex: 1; margin: 0; min-width: 120px; }
+    .stats { margin-top: 8px; font-size: 0.8rem; color: #64748b; text-align: left; direction: ltr; }
+    .guide {
+      background: #0f172a;
+      border-right: 4px solid #38bdf8;
+      padding: 15px 18px;
+      border-radius: 8px;
+      margin-top: 15px;
+      font-size: 0.9rem;
+      line-height: 2;
+      color: #cbd5e1;
+    }
+    .guide b { color: #38bdf8; }
+    .guide ol { padding-right: 20px; }
+    code { background: #1e293b; padding: 2px 6px; border-radius: 4px; font-family: monospace; color: #38bdf8; }
   </style>
 </head>
 <body>
 
+  <!-- ========== صفحه ورود ========== -->
   <div class="card" id="loginView">
-    <h1>ورود</h1>
+    <h1>🔐 ورود به پنل</h1>
     <label>نام کاربری</label>
-    <input id="username" type="text" />
+    <input id="username" type="text" autocomplete="username" />
     <label>رمز عبور</label>
-    <input id="password" type="password" />
+    <input id="password" type="password" autocomplete="current-password" />
     <button onclick="login()">ورود</button>
     <p id="loginError" class="status error"></p>
   </div>
 
+  <!-- ========== پنل اصلی ========== -->
   <div class="card hidden" id="mainView">
-    <h1>استخراج متن ویدیو</h1>
-    <button onclick="logout()" style="width: auto; padding: 5px 15px; background: transparent; border: 1px solid #f87171; color: #f87171; margin: 0 0 15px 0; font-size: 0.8rem;">خروج</button>
-    
+    <button onclick="logout()" class="red">خروج</button>
+    <h1>📝 استخراج و کپی متن ویدیو</h1>
+
     <label>لینک یوتیوب</label>
     <input id="url" type="text" placeholder="https://www.youtube.com/watch?v=..." />
-    
-    <label>زبان زیرنویس</label>
+
+    <label>زبان ترنسکریپت</label>
     <select id="lang">
       <option value="en">انگلیسی (English)</option>
       <option value="fa">فارسی</option>
       <option value="de">آلمانی (Deutsch)</option>
+      <option value="fr">فرانسوی (Français)</option>
     </select>
 
-    <button id="extractBtn" onclick="extractText()">استخراج متن</button>
+    <button id="extractBtn" onclick="extractText()">تلاش برای استخراج خودکار</button>
     <p id="status" class="status"></p>
 
-    <div id="resultBox" class="hidden">
-      <label>متن استخراج‌شده (کپی کن و برای هوش مصنوعی بفرست)</label>
-      <textarea id="result" readonly></textarea>
-      <button onclick="copyText()" style="background: #10b981; color: white; margin-top: 10px;">کپی متن</button>
+    <!-- راهنمای دستی (همیشه در دسترس) -->
+    <div class="guide">
+      <b>⚠️ اگر استخراج خودکار کار نکرد (معمولاً نمی‌کند)، از این روش دستی استفاده کن:</b>
+      <ol>
+        <li>ویدیو را در یوتیوب باز کن.</li>
+        <li>زیر ویدیو روی <b>«...» (More)</b> کلیک کن.</li>
+        <li>گزینه <b>«Show transcript»</b> را انتخاب کن.</li>
+        <li>متن را از پنل سمت راست انتخاب و کپی کن (Ctrl+C).</li>
+        <li>متن را در کادر پایین پیست کن (Ctrl+V).</li>
+        <li>دکمه <b>«پاک‌سازی تایم‌استمپ»</b> را بزن تا متن تمیز شود.</li>
+        <li>دکمه <b>«کپی متن»</b> را بزن و متن را در چت هوش مصنوعی پیست کن.</li>
+      </ol>
     </div>
+
+    <!-- کادر نتیجه (همیشه نمایش داده می‌شود) -->
+    <h2>📄 متن ترنسکریپت</h2>
+    <textarea id="result"
+      placeholder="متن ترنسکریپت را اینجا پیست کن... (Ctrl+V)"
+    ></textarea>
+    <div class="stats" id="stats">کلمات: 0 | کاراکترها: 0</div>
+
+    <div class="row">
+      <button class="secondary" onclick="cleanTimestamps()">🧹 پاک‌سازی تایم‌استمپ</button>
+      <button class="secondary" onclick="clearText()">🗑️ پاک کردن همه</button>
+    </div>
+
+    <div class="row">
+      <button class="green" id="copyBtn" onclick="copyText()">📋 کپی متن</button>
+    </div>
+
+    <p class="status" id="copyStatus"></p>
   </div>
 
   <script>
-    // --- Auth ---
+    /* ============================================================
+       احراز هویت (ساده - فقط در مرورگر)
+       ============================================================ */
     const USER = "mousa";
     const PASS = "2866";
-    
+
     function login() {
-      const u = document.getElementById('username').value;
+      const u = document.getElementById('username').value.trim();
       const p = document.getElementById('password').value;
       if (u === USER && p === PASS) {
         document.getElementById('loginView').classList.add('hidden');
         document.getElementById('mainView').classList.remove('hidden');
       } else {
-        document.getElementById('loginError').innerText = "نام کاربری یا رمز اشتباه است";
+        document.getElementById('loginError').innerText = "❌ نام کاربری یا رمز عبور اشتباه است";
       }
     }
 
     function logout() {
       document.getElementById('loginView').classList.remove('hidden');
       document.getElementById('mainView').classList.add('hidden');
+      document.getElementById('password').value = "";
     }
 
-    // --- Extractor Logic ---
+    // Enter برای ورود
+    document.getElementById('password').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') login();
+    });
+
+    /* ============================================================
+       استخراج Video ID از لینک
+       ============================================================ */
     function getVideoId(url) {
       const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
       const match = url.match(regExp);
       return (match && match[2].length === 11) ? match[2] : null;
     }
 
-async function extractText() {
-  const url = document.getElementById('url').value;
-  const lang = document.getElementById('lang').value;
-  const status = document.getElementById('status');
-  const btn = document.getElementById('extractBtn');
-  const resultBox = document.getElementById('resultBox');
-  const resultArea = document.getElementById('result');
-
-  const videoId = getVideoId(url);
-  if (!videoId) {
-    status.innerText = "❌ لینک نامعتبر است";
-    return;
-  }
-
-  btn.disabled = true;
-  resultBox.classList.add('hidden');
-  status.innerText = "⏳ در حال تلاش برای استخراج خودکار...";
-
-  // تلاش از طریق سرویس واسط (ممکن است کار کند یا نکند)
-  try {
-    const res = await fetch(`https://youtubetranscript.com/?server_vid2=${videoId}`);
-    if (res.ok) {
-      const xml = await res.text();
-      const text = parseXML(xml);
-      if (text && text.length > 50) {
-        resultArea.value = text;
-        resultArea.readOnly = true;
-        resultBox.classList.remove('hidden');
-        status.innerText = "✅ متن خودکار استخراج شد.";
-        btn.disabled = false;
-        return;
-      }
-    }
-  } catch (e) {}
-
-  // اگر خودکار نشد → راهنمایی به روش دستی
-  status.innerHTML = `
-    ⚠️ یوتیوب دسترسی خودکار را مسدود کرده است.<br><br>
-    <b>راه‌حل فوری (دستی):</b><br>
-    1. ویدیو را در یوتیوب باز کن.<br>
-    2. زیر ویدیو روی «...» بزن و <b>Show transcript</b> را انتخاب کن.<br>
-    3. متن را کپی کن و در کادر زیر بچسبان.
-  `;
-  status.className = "status error";
-  
-  resultArea.value = "";
-  resultArea.readOnly = false;
-  resultArea.placeholder = "متن ترنسکریپت را اینجا بچسبان...";
-  resultBox.classList.remove('hidden');
-  btn.disabled = false;
-}
-
-      // روش ۱: استفاده از سرویس عمومی
-      try {
-        const res = await fetch(`https://youtubetranscript.com/?server_vid2=${videoId}`);
-        if (res.ok) {
-          const xml = await res.text();
-          if (xml.includes('<text')) {
-             const text = parseXML(xml);
-             if (text) {
-               resultArea.value = text;
-               resultBox.classList.remove('hidden');
-               status.innerText = "✅ متن با موفقیت استخراج شد.";
-               btn.disabled = false;
-               return;
-             }
-          }
-        }
-      } catch (e) {}
-
-      // روش ۲: استفاده از CORS Proxy برای timedtext یوتیوب
-      try {
-        const target = `https://www.youtube.com/api/timedtext?lang=${lang}&v=${videoId}`;
-        const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`);
-        if (res.ok) {
-          const xml = await res.text();
-          const text = parseXML(xml);
-          if (text) {
-            resultArea.value = text;
-            resultBox.classList.remove('hidden');
-            status.innerText = "✅ متن با موفقیت استخراج شد.";
-            btn.disabled = false;
-            return;
-          }
-        }
-      } catch (e) {}
-
-      // اگر هر دو شکست خوردند
-      status.innerText = "❌ زیرنویس خودکار پیدا نشد. لطفاً به صورت دستی در یوتیوب زیر ویدیو روی (...) بزن و Show Transcript را انتخاب کن و متن را کپی کن.";
-      status.className = "status error";
-      resultArea.value = "";
-      resultArea.readOnly = false;
-      resultArea.placeholder = "متن را اینجا بچسبان...";
-      resultBox.classList.remove('hidden');
-      btn.disabled = false;
-    }
-
+    /* ============================================================
+       پارس XML زیرنویس
+       ============================================================ */
     function parseXML(xml) {
       try {
         const parser = new DOMParser();
@@ -190,18 +210,199 @@ async function extractText() {
         if (texts.length === 0) return null;
         let lines = [];
         for (let i = 0; i < texts.length; i++) {
-          lines.push(texts[i].textContent);
+          let t = texts[i].textContent
+            .replace(/&amp;/g, "&")
+            .replace(/&#39;/g, "'")
+            .replace(/&quot;/g, '"')
+            .replace(/&lt;/g, "<")
+            .replace(/&gt;/g, ">")
+            .replace(/&nbsp;/g, " ")
+            .trim();
+          if (t) lines.push(t);
         }
         return lines.join(" ").replace(/\s+/g, ' ').trim();
       } catch { return null; }
     }
 
-    function copyText() {
-      const text = document.getElementById('result');
-      text.select();
-      document.execCommand('copy');
-      alert('متن کپی شد! الان می‌تونی در چت هوش مصنوعی پیست کنی.');
+    /* ============================================================
+       تلاش برای استخراج خودکار
+       ============================================================ */
+    async function extractText() {
+      const url = document.getElementById('url').value.trim();
+      const lang = document.getElementById('lang').value;
+      const status = document.getElementById('status');
+      const btn = document.getElementById('extractBtn');
+      const resultArea = document.getElementById('result');
+
+      if (!url) {
+        status.innerText = "❌ لطفاً لینک را وارد کنید.";
+        status.className = "status error";
+        return;
+      }
+
+      const videoId = getVideoId(url);
+      if (!videoId) {
+        status.innerText = "❌ لینک یوتیوب معتبر نیست.";
+        status.className = "status error";
+        return;
+      }
+
+      btn.disabled = true;
+      status.className = "status";
+      status.innerText = "⏳ در حال تلاش برای استخراج خودکار...";
+
+      // تلاش ۱
+      try {
+        const res = await fetch(`https://youtubetranscript.com/?server_vid2=${videoId}`);
+        if (res.ok) {
+          const xml = await res.text();
+          const text = parseXML(xml);
+          if (text && text.length > 50) {
+            resultArea.value = text;
+            updateStats();
+            status.innerText = "✅ متن با موفقیت استخراج شد.";
+            status.className = "status success";
+            btn.disabled = false;
+            return;
+          }
+        }
+      } catch (e) {}
+
+      // تلاش ۲
+      try {
+        const target = `https://www.youtube.com/api/timedtext?lang=${lang}&v=${videoId}`;
+        const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`);
+        if (res.ok) {
+          const xml = await res.text();
+          const text = parseXML(xml);
+          if (text && text.length > 50) {
+            resultArea.value = text;
+            updateStats();
+            status.innerText = "✅ متن با موفقیت استخراج شد.";
+            status.className = "status success";
+            btn.disabled = false;
+            return;
+          }
+        }
+      } catch (e) {}
+
+      // شکست
+      status.innerHTML = "⚠️ استخراج خودکار مسدود شده است. از راهنمای بالا (روش دستی) استفاده کن.";
+      status.className = "status error";
+      btn.disabled = false;
     }
+
+    /* ============================================================
+       پاک‌سازی تایم‌استمپ‌های یوتیوب
+       ============================================================ */
+    function cleanTimestamps() {
+      const area = document.getElementById('result');
+      let text = area.value;
+
+      if (!text.trim()) {
+        document.getElementById('status').innerText = "⚠️ کادر متن خالی است.";
+        return;
+      }
+
+      // الگوی تایم‌استمپ: 0:05 / 00:12 / 1:23:45 / (0:05) / [00:12]
+      text = text.replace(/\b\d{1,2}:\d{2}(:\d{2})?\b/g, ' ');
+      // حذف پرانتزهای خالی مانده
+      text = text.replace(/\(\s*\)/g, ' ');
+      text = text.replace(/\[\s*\]/g, ' ');
+      // حذف فاصله‌های اضافی
+      text = text.replace(/\s+/g, ' ').trim();
+
+      area.value = text;
+      updateStats();
+      document.getElementById('status').innerText = "✅ تایم‌استمپ‌ها پاک شدند.";
+      document.getElementById('status').className = "status success";
+    }
+
+    /* ============================================================
+       کپی مقاوم به مرورگر
+       ============================================================ */
+    async function copyText() {
+      const area = document.getElementById('result');
+      const copyBtn = document.getElementById('copyBtn');
+      const copyStatus = document.getElementById('copyStatus');
+      const text = area.value;
+
+      if (!text.trim()) {
+        copyStatus.innerText = "⚠️ کادر متن خالی است. اول متن را پیست کن.";
+        copyStatus.className = "status error";
+        return;
+      }
+
+      let success = false;
+
+      // روش ۱: Clipboard API مدرن
+      if (navigator.clipboard && window.isSecureContext) {
+        try {
+          await navigator.clipboard.writeText(text);
+          success = true;
+        } catch (e) {
+          console.warn("Clipboard API شکست خورد:", e);
+        }
+      }
+
+      // روش ۲: execCommand (پشتیبانی قدیمی / HTTP)
+      if (!success) {
+        try {
+          area.focus();
+          area.select();
+          area.setSelectionRange(0, 999999);
+          success = document.execCommand('copy');
+          // لغو انتخاب
+          area.setSelectionRange(0, 0);
+          window.getSelection().removeAllRanges();
+        } catch (e) {
+          console.warn("execCommand شکست خورد:", e);
+        }
+      }
+
+      // روش ۳: prompt به‌عنوان آخرین راه
+      if (!success) {
+        window.prompt("کپی خودکار ممکن نشد. متن را دستی کپی کن:", text);
+        copyStatus.innerText = "⚠️ از پنجره باز شده دستی کپی کن.";
+        copyStatus.className = "status error";
+        return;
+      }
+
+      // اعلام موفقیت
+      copyBtn.innerText = "✅ کپی شد!";
+      copyBtn.style.background = "#059669";
+      copyStatus.innerText = "✅ متن کپی شد. الان می‌تونی در چت هوش مصنوعی پیست کنی (Ctrl+V).";
+      copyStatus.className = "status success";
+
+      setTimeout(() => {
+        copyBtn.innerText = "📋 کپی متن";
+        copyBtn.style.background = "";
+      }, 2500);
+    }
+
+    /* ============================================================
+       پاک کردن کامل
+       ============================================================ */
+    function clearText() {
+      document.getElementById('result').value = "";
+      document.getElementById('status').innerText = "";
+      document.getElementById('copyStatus').innerText = "";
+      updateStats();
+    }
+
+    /* ============================================================
+       آمار کلمات و کاراکترها
+       ============================================================ */
+    function updateStats() {
+      const text = document.getElementById('result').value;
+      const chars = text.length;
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      document.getElementById('stats').innerText =
+        `کلمات: ${words.toLocaleString()} | کاراکترها: ${chars.toLocaleString()}`;
+    }
+
+    // به‌روزرسانی آمار با هر تغییر
+    document.getElementById('result').addEventListener('input', updateStats);
   </script>
 </body>
 </html>
