@@ -85,25 +85,57 @@
       return (match && match[2].length === 11) ? match[2] : null;
     }
 
-    async function extractText() {
-      const url = document.getElementById('url').value;
-      const lang = document.getElementById('lang').value;
-      const status = document.getElementById('status');
-      const btn = document.getElementById('extractBtn');
-      const resultBox = document.getElementById('resultBox');
-      const resultArea = document.getElementById('result');
+async function extractText() {
+  const url = document.getElementById('url').value;
+  const lang = document.getElementById('lang').value;
+  const status = document.getElementById('status');
+  const btn = document.getElementById('extractBtn');
+  const resultBox = document.getElementById('resultBox');
+  const resultArea = document.getElementById('result');
 
-      const videoId = getVideoId(url);
-      if (!videoId) {
-        status.innerText = "لینک نامعتبر است";
-        status.className = "status error";
+  const videoId = getVideoId(url);
+  if (!videoId) {
+    status.innerText = "❌ لینک نامعتبر است";
+    return;
+  }
+
+  btn.disabled = true;
+  resultBox.classList.add('hidden');
+  status.innerText = "⏳ در حال تلاش برای استخراج خودکار...";
+
+  // تلاش از طریق سرویس واسط (ممکن است کار کند یا نکند)
+  try {
+    const res = await fetch(`https://youtubetranscript.com/?server_vid2=${videoId}`);
+    if (res.ok) {
+      const xml = await res.text();
+      const text = parseXML(xml);
+      if (text && text.length > 50) {
+        resultArea.value = text;
+        resultArea.readOnly = true;
+        resultBox.classList.remove('hidden');
+        status.innerText = "✅ متن خودکار استخراج شد.";
+        btn.disabled = false;
         return;
       }
+    }
+  } catch (e) {}
 
-      btn.disabled = true;
-      resultBox.classList.add('hidden');
-      status.innerText = "در حال تلاش برای استخراج...";
-      status.className = "status";
+  // اگر خودکار نشد → راهنمایی به روش دستی
+  status.innerHTML = `
+    ⚠️ یوتیوب دسترسی خودکار را مسدود کرده است.<br><br>
+    <b>راه‌حل فوری (دستی):</b><br>
+    1. ویدیو را در یوتیوب باز کن.<br>
+    2. زیر ویدیو روی «...» بزن و <b>Show transcript</b> را انتخاب کن.<br>
+    3. متن را کپی کن و در کادر زیر بچسبان.
+  `;
+  status.className = "status error";
+  
+  resultArea.value = "";
+  resultArea.readOnly = false;
+  resultArea.placeholder = "متن ترنسکریپت را اینجا بچسبان...";
+  resultBox.classList.remove('hidden');
+  btn.disabled = false;
+}
 
       // روش ۱: استفاده از سرویس عمومی
       try {
